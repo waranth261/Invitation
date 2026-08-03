@@ -52,9 +52,19 @@ function nextStep(stepNumber) {
   if (stepNumber === 2) showStep('step2', 2);
 }
 
-// Process Date & Time Selection with Time Routing Logic
+// Process Name, Date & Time Selection with Time Routing Logic
 function processDateTime() {
+  const nameInput = document.getElementById('userName');
   const datetimeInput = document.getElementById('datetime');
+
+  // Validate Name Input
+  if (!nameInput.value.trim()) {
+    alert('Please enter your name!');
+    nameInput.focus();
+    return;
+  }
+
+  // Validate Date & Time Input
   if (!datetimeInput.value) {
     alert('Please pick a date and time!');
     return;
@@ -71,7 +81,7 @@ function processDateTime() {
   } else if (hour >= 13 && hour <= 17) {
     // 1:00 PM to 5:00 PM -> Skip Lunch, go directly to Snacks
     isLunchSkipped = true;
-    selectedLunch = ''; // Reset lunch selection if previously picked
+    selectedLunch = ''; 
     showStep('stepSnacks', 3);
   } else {
     // After 5:00 PM -> Skip Lunch and Snacks, go directly to Dinner
@@ -204,6 +214,7 @@ function finishDatePlan() {
     return;
   }
 
+  const userName = document.getElementById('userName').value.trim();
   const datetimeInput = document.getElementById('datetime');
   const rawDate = new Date(datetimeInput.value);
   const formattedDate = rawDate.toLocaleDateString('en-US', {
@@ -217,6 +228,10 @@ function finishDatePlan() {
   // 1. Build the summary table for screen display
   const tableBody = document.getElementById('summaryTableBody');
   let tableHTML = `
+    <tr>
+      <th>Name</th>
+      <td>${userName}</td>
+    </tr>
     <tr>
       <th>Date & Time</th>
       <td>${formattedDate}</td>
@@ -244,8 +259,9 @@ function finishDatePlan() {
     tableBody.innerHTML = tableHTML;
   }
 
-  // 2. Prepare payload object for Formspree
+  // 2. Prepare payload object for Formspree (Includes 'name' field)
   const formData = {
+    name: userName,
     dateTime: formattedDate,
     lunch: selectedLunch || 'N/A (Skipped)',
     snack: selectedSnack || 'N/A (Skipped)',
