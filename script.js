@@ -1,70 +1,50 @@
-// ==========================================
-// STATE VARIABLES
-// ==========================================
-let chosenTimeMode = ''; // 'before-noon', 'afternoon', 'dinner-only'
+// State management variables
 let selectedLunch = '';
 let selectedSnack = '';
 let selectedDinner = '';
 let selectedActivities = new Set();
 
-// Custom Input Modes ('replace' or 'add') for Meal Steps
+// Tracks whether lunch was skipped based on selected time
+let isLunchSkipped = false;
+
+// Custom input mode tracking ('replace' or 'add')
 let customModes = {
   lunch: 'replace',
   snack: 'replace',
   dinner: 'replace'
 };
 
-// Set minimum datetime input to current time
-const datetimeInput = document.getElementById('datetime');
-if (datetimeInput) {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  datetimeInput.min = now.toISOString().slice(0, 16);
-}
+// Mode toggle helper function
+function toggleCustomMode(mealType) {
+  const modeBtn = document.getElementById(`${mealType}ModeBtn`);
+  const modeIcon = document.getElementById(`${mealType}ModeIcon`);
+  const modeText = document.getElementById(`${mealType}ModeText`);
+  const modeHint = document.getElementById(`${mealType}ModeHint`);
 
-// ==========================================
-// PLAYFUL "NO" BUTTON DODGING LOGIC
-// ==========================================
-const noBtn = document.getElementById('noBtn');
-const yesBtn = document.getElementById('yesBtn');
-let yesScale = 1;
-
-if (noBtn) {
-  noBtn.addEventListener('mouseover', moveNoButton);
-  noBtn.addEventListener('click', moveNoButton);
-}
-
-function moveNoButton() {
-  const container = document.querySelector('.container');
-  const rect = container.getBoundingClientRect();
-
-  const randomX = (Math.random() - 0.5) * (rect.width - 100);
-  const randomY = (Math.random() - 0.5) * (rect.height - 100);
-
-  noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
-  yesScale += 0.1;
-  if (yesBtn) {
-    yesBtn.style.transform = `scale(${yesScale})`;
+  if (customModes[mealType] === 'replace') {
+    customModes[mealType] = 'add';
+    modeBtn.classList.remove('replace-mode');
+    modeBtn.classList.add('add-mode');
+    modeIcon.textContent = '+';
+    modeText.textContent = 'Add';
+    modeHint.textContent = '💡 Current Mode: Appends custom choice to selected category.';
+  } else {
+    customModes[mealType] = 'replace';
+    modeBtn.classList.remove('add-mode');
+    modeBtn.classList.add('replace-mode');
+    modeIcon.textContent = '⇄';
+    modeText.textContent = 'Replace';
+    modeHint.textContent = '💡 Current Mode: Replaces selected choice if filled out.';
   }
 }
 
-// ==========================================
-// STEP & BACKGROUND NAVIGATION
-// ==========================================
-function updateBackground(stepBgIndex) {
-  document.body.classList.remove('bg-step-1', 'bg-step-2', 'bg-step-3', 'bg-step-4');
-  document.body.classList.add(`bg-step-${stepBgIndex}`);
-}
+// Navigation helper + Step Background Switcher
+function showStep(stepId, stepNum) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(stepId).classList.add('active');
 
-function showStep(stepId, bgIndex) {
-  document.querySelectorAll('.step').forEach((step) => {
-    step.classList.remove('active');
-  });
-  const targetStep = document.getElementById(stepId);
-  if (targetStep) {
-    targetStep.classList.add('active');
-  }
-  updateBackground(bgIndex);
+  // Change body background image based on step number
+  document.body.className = `bg-step-${stepNum}`;
 }
 
 function nextStep(stepNumber) {
@@ -72,190 +52,146 @@ function nextStep(stepNumber) {
   if (stepNumber === 2) showStep('step2', 2);
 }
 
-// Check time chosen on calendar
+// Process Date & Time Selection with Time Routing Logic
 function processDateTime() {
-  const val = datetimeInput.value;
-  if (!val) {
+  const datetimeInput = document.getElementById('datetime');
+  if (!datetimeInput.value) {
     alert('Please pick a date and time!');
     return;
   }
 
-  const selectedDate = new Date(val);
-  const hours = selectedDate.getHours();
+  const selectedDate = new Date(datetimeInput.value);
+  const hour = selectedDate.getHours(); // 0 - 23 format
 
-  if (hours < 12) {
-    // Before 12 PM -> Lunch
-    chosenTimeMode = 'before-noon';
+  // Time-based routing logic:
+  if (hour < 13) {
+    // Before 1:00 PM -> Show Lunch
+    isLunchSkipped = false;
     showStep('stepLunch', 3);
-  } else if (hours >= 13 && hours < 17) {
-    // 1 PM to 4:59 PM -> Snacks then Dinner
-    chosenTimeMode = 'afternoon';
+  } else if (hour >= 13 && hour <= 17) {
+    // 1:00 PM to 5:00 PM -> Skip Lunch, go directly to Snacks
+    isLunchSkipped = true;
+    selectedLunch = ''; // Reset lunch selection if previously picked
     showStep('stepSnacks', 3);
   } else {
-    // 12 PM - 1 PM or 5 PM onwards -> Dinner directly
-    chosenTimeMode = 'dinner-only';
+    // After 5:00 PM -> Skip Lunch and Snacks, go directly to Dinner
+    isLunchSkipped = true;
+    selectedLunch = '';
+    selectedSnack = '';
     showStep('stepDinner', 3);
   }
 }
 
-// ==========================================
-// ACCORDION & CHOICE SELECTION
-// ==========================================
+// Submenu Accordion Toggle (Uses .active class)
 function toggleSubMenu(cardElement) {
-  const parentContainer = cardElement.parentElement;
-  parentContainer.querySelectorAll('.category-card').forEach((card) => {
-    if (card !== cardElement) card.classList.remove('active');
+  const parentStack = cardElement.parentElement;
+  const isAlreadyActive = cardElement.classList.contains('active');
+
+  // Close other open cards in the same section
+  parentStack.querySelectorAll('.category-card').forEach(card => {
+    card.classList.remove('active');
   });
-  cardElement.classList.toggle('active');
-}
 
-function selectSubOption(event, mealType, categoryName, subValue) {
-  event.stopPropagation(); // Prevents closing the accordion card
-
-  const cardElement = event.target.closest('.category-card');
-  const grid = cardElement.querySelector('.sub-options-grid');
-  
-  grid.querySelectorAll('.sub-chip').forEach(chip => chip.classList.remove('selected'));
-  event.target.classList.add('selected');
-
-  const badge = cardElement.querySelector('.selected-badge');
-  if (badge) {
-    badge.innerText = `Selected: ${subValue}`;
+  if (!isAlreadyActive) {
+    cardElement.classList.add('active');
   }
-
-  const fullChoice = `${categoryName} (${subValue})`;
-  if (mealType === 'lunch') selectedLunch = fullChoice;
-  if (mealType === 'snack') selectedSnack = fullChoice;
-  if (mealType === 'dinner') selectedDinner = fullChoice;
 }
 
-function toggleActivitySubOption(event, chipElement, activityValue) {
+// Sub-option selection logic for Lunch, Snacks, and Dinner
+function selectSubOption(event, type, categoryName, choiceValue) {
+  event.stopPropagation(); // Prevent card accordion from toggling off
+
+  const parentCard = event.currentTarget.closest('.category-card');
+  const parentStack = parentCard.parentElement;
+
+  // Clear previous chip highlights
+  parentStack.querySelectorAll('.sub-chip').forEach(chip => chip.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  // Update badge on card header
+  parentCard.querySelector('.selected-badge').textContent = `Selected: ${choiceValue}`;
+
+  if (type === 'lunch') selectedLunch = choiceValue;
+  if (type === 'snack') selectedSnack = choiceValue;
+  if (type === 'dinner') selectedDinner = choiceValue;
+}
+
+// Activity sub-option toggling (Multiple selection allowed)
+function toggleActivitySubOption(event, buttonElement, choiceValue) {
   event.stopPropagation();
-  chipElement.classList.toggle('selected');
 
-  if (selectedActivities.has(activityValue)) {
-    selectedActivities.delete(activityValue);
+  if (selectedActivities.has(choiceValue)) {
+    selectedActivities.delete(choiceValue);
+    buttonElement.classList.remove('selected');
   } else {
-    selectedActivities.add(activityValue);
-  }
-
-  const cardElement = chipElement.closest('.category-card');
-  const badge = cardElement.querySelector('.selected-badge');
-  const selectedCount = cardElement.querySelectorAll('.sub-chip.selected').length;
-
-  if (badge) {
-    badge.innerText = selectedCount > 0 ? `${selectedCount} spot(s) chosen` : 'Tap to pick spot';
+    selectedActivities.add(choiceValue);
+    buttonElement.classList.add('selected');
   }
 }
 
-// ==========================================
-// ADD (+) / REPLACE (⇄) TOGGLE LOGIC
-// ==========================================
-function toggleCustomMode(mealType) {
-  const currentMode = customModes[mealType];
-  const newMode = currentMode === 'replace' ? 'add' : 'replace';
-  customModes[mealType] = newMode;
-
-  const btn = document.getElementById(`${mealType}ModeBtn`);
-  const icon = document.getElementById(`${mealType}ModeIcon`);
-  const text = document.getElementById(`${mealType}ModeText`);
-  const hint = document.getElementById(`${mealType}ModeHint`);
-
-  if (newMode === 'add') {
-    if (btn) btn.className = 'mode-btn add-mode';
-    if (icon) icon.innerText = '+';
-    if (text) text.innerText = 'Add';
-    if (hint) hint.innerText = '💡 Current Mode: Adds to your selected choice above.';
-  } else {
-    if (btn) btn.className = 'mode-btn replace-mode';
-    if (icon) icon.innerText = '⇄';
-    if (text) text.innerText = 'Replace';
-    if (hint) hint.innerText = '💡 Current Mode: Replaces selected choice if filled out.';
-  }
-}
-
-// ==========================================
-// STEP CONFIRMATION HANDLERS
-// ==========================================
+// Confirmation Step Navigation Handlers
 function confirmLunch() {
-  const custom = document.getElementById('customLunch') ? document.getElementById('customLunch').value.trim() : '';
-  const mode = customModes['lunch'];
-
-  if (custom) {
-    if (mode === 'add' && selectedLunch) {
-      selectedLunch = `${selectedLunch} + ${custom}`;
+  const customInput = document.getElementById('customLunch').value.trim();
+  if (customInput) {
+    if (customModes.lunch === 'add' && selectedLunch) {
+      selectedLunch = `${selectedLunch} + ${customInput}`;
     } else {
-      selectedLunch = custom;
+      selectedLunch = customInput;
     }
   }
-
-  if (!selectedLunch) {
-    alert('Please pick a lunch spot or type your own!');
-    return;
-  }
-  showStep('stepActivities', 3);
+  showStep('stepSnacks', 3);
 }
 
 function confirmSnacks() {
-  const custom = document.getElementById('customSnack') ? document.getElementById('customSnack').value.trim() : '';
-  const mode = customModes['snack'];
-
-  if (custom) {
-    if (mode === 'add' && selectedSnack) {
-      selectedSnack = `${selectedSnack} + ${custom}`;
+  const customInput = document.getElementById('customSnack').value.trim();
+  if (customInput) {
+    if (customModes.snack === 'add' && selectedSnack) {
+      selectedSnack = `${selectedSnack} + ${customInput}`;
     } else {
-      selectedSnack = custom;
+      selectedSnack = customInput;
     }
-  }
-
-  if (!selectedSnack) {
-    alert('Please pick a snack spot or type your own!');
-    return;
   }
   showStep('stepDinner', 3);
 }
 
 function confirmDinner() {
-  const custom = document.getElementById('customDinner') ? document.getElementById('customDinner').value.trim() : '';
-  const mode = customModes['dinner'];
-
-  if (custom) {
-    if (mode === 'add' && selectedDinner) {
-      selectedDinner = `${selectedDinner} + ${custom}`;
+  const customInput = document.getElementById('customDinner').value.trim();
+  if (customInput) {
+    if (customModes.dinner === 'add' && selectedDinner) {
+      selectedDinner = `${selectedDinner} + ${customInput}`;
     } else {
-      selectedDinner = custom;
+      selectedDinner = customInput;
     }
-  }
-
-  if (!selectedDinner) {
-    alert('Please pick a dinner spot or type your own!');
-    return;
   }
   showStep('stepActivities', 3);
 }
 
-// ==========================================
-// DYNAMIC BACK BUTTON ROUTING
-// ==========================================
-function goBackFromDinner() {
-  if (chosenTimeMode === 'afternoon') {
-    showStep('stepSnacks', 3);
+// Dynamic Back Navigation Logic
+function goBackFromSnacks() {
+  if (isLunchSkipped) {
+    showStep('step2', 2); // Return to Date & Time selection if lunch was skipped
   } else {
-    showStep('step2', 2);
+    showStep('stepLunch', 3); // Return to Lunch
   }
 }
 
-function goBackFromActivities() {
-  if (chosenTimeMode === 'before-noon') {
-    showStep('stepLunch', 3);
-  } else {
-    showStep('stepDinner', 3);
+function goBackFromDinner() { 
+  const datetimeInput = document.getElementById('datetime');
+  if (datetimeInput.value) {
+    const hour = new Date(datetimeInput.value).getHours();
+    if (hour > 17) {
+      showStep('step2', 2); // Go directly to Date & Time if both lunch & snacks were skipped
+      return;
+    }
   }
+  showStep('stepSnacks', 3); 
 }
 
-// ==========================================
-// SUMMARY TABLE GENERATION & CONFETTI
-// ==========================================
+function goBackFromActivities() { 
+  showStep('stepDinner', 3); 
+}
+
+// Final Submission with Formspree Data Post
 function finishDatePlan() {
   const customActInput = document.getElementById('customActivity');
   const customAct = customActInput ? customActInput.value.trim() : '';
@@ -268,6 +204,7 @@ function finishDatePlan() {
     return;
   }
 
+  const datetimeInput = document.getElementById('datetime');
   const rawDate = new Date(datetimeInput.value);
   const formattedDate = rawDate.toLocaleDateString('en-US', {
     weekday: 'short',
@@ -277,6 +214,7 @@ function finishDatePlan() {
     minute: '2-digit',
   });
 
+  // 1. Build the summary table for screen display
   const tableBody = document.getElementById('summaryTableBody');
   let tableHTML = `
     <tr>
@@ -288,11 +226,9 @@ function finishDatePlan() {
   if (selectedLunch) {
     tableHTML += `<tr><th>Lunch</th><td>${selectedLunch}</td></tr>`;
   }
-
   if (selectedSnack) {
     tableHTML += `<tr><th>Snack</th><td>${selectedSnack}</td></tr>`;
   }
-
   if (selectedDinner) {
     tableHTML += `<tr><th>Dinner</th><td>${selectedDinner}</td></tr>`;
   }
@@ -307,17 +243,46 @@ function finishDatePlan() {
   if (tableBody) {
     tableBody.innerHTML = tableHTML;
   }
-  
-  showStep('stepSummary', 4);
-  launchConfetti();
+
+  // 2. Prepare payload object for Formspree
+  const formData = {
+    dateTime: formattedDate,
+    lunch: selectedLunch || 'N/A (Skipped)',
+    snack: selectedSnack || 'N/A (Skipped)',
+    dinner: selectedDinner || 'N/A',
+    activities: activitiesList.join(', ')
+  };
+
+  // 3. Send payload to Formspree
+  fetch('https://formspree.io/f/xpqvvrlg', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+  .then(response => {
+    if (response.ok) {
+      showStep('stepSummary', 4);
+      launchConfetti();
+    } else {
+      alert('Oops! Something went wrong saving your choices. Please try again.');
+    }
+  })
+  .catch(error => {
+    console.error('Error submitting form:', error);
+    alert('Network error. Please check your internet connection.');
+  });
 }
 
+// Confetti Effect Generator
 function launchConfetti() {
   if (typeof confetti === 'function') {
-    confetti({ particleCount: 80, spread: 70, origin: { x: 0.2, y: 0.6 } });
-    confetti({ particleCount: 80, spread: 70, origin: { x: 0.8, y: 0.6 } });
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
   }
 }
-
-// Initialize on Step 1
-updateBackground(1);
