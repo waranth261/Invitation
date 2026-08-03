@@ -21,12 +21,18 @@
       </div>
     </div>
 
-    <!-- STEP 2: Pick Date & Time -->
+    <!-- STEP 2: Pick Name, Date & Time -->
     <div class="step" id="step2">
       <div class="emoji-header">📅</div>
       <h2>When are you free?</h2>
-      <p class="subtitle">Choose a date and specific time that works for you</p>
+      <p class="subtitle">Please enter your name and choose a date & time</p>
       
+      <!-- Added Name Input Field -->
+      <div class="form-group">
+        <label for="userName">Your Name</label>
+        <input type="text" id="userName" name="userName" placeholder="Enter your name here..." required />
+      </div>
+
       <div class="form-group">
         <label for="datetime">Date & Time</label>
         <input type="datetime-local" id="datetime" name="datetime" />
