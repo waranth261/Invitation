@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>An Invitation💌</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- STEP 1: Ask Question -->
+    <div class="step active" id="step1">
+      <div class="emoji-header">💖</div>
+      <h2>Can I Invite You to a Holidate?</h2>
+      <p class="subtitle">I'd really love to spend some time together!</p>
+      <div class="btn-group">
+        <button type="button" class="btn" id="yesBtn" onclick="nextStep(2)">Yes! 🥰</button>
+        <button type="button" class="btn btn-secondary" id="noBtn">No 😢</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Pick Date & Time -->
+    <div class="step" id="step2">
+      <div class="emoji-header">📅</div>
+      <h2>When are you free?</h2>
+      <p class="subtitle">Choose a date and specific time that works for you</p>
+      
+      <div class="form-group">
+        <label for="datetime">Date & Time</label>
+        <input type="datetime-local" id="datetime" name="datetime" />
+      </div>
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-secondary" onclick="nextStep(1)">Back</button>
+        <button type="button" class="btn" onclick="processDateTime()">Next ➡️</button>
+      </div>
+    </div>
+
+    <!-- STEP: LUNCH -->
+    <div class="step" id="stepLunch">
+      <div class="emoji-header">🍔</div>
+      <h2>What are we eating for lunch?</h2>
+      <p class="subtitle">Tap a category to choose your favorite spot!</p>
+
+      <div class="choices-stack">
+        <!-- Fast Food -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🍟</span>
+            <div class="card-title">
+              <strong>Fast Food</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Fast Food', 'Jollibee 🐝')">Jollibee 🐝</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Fast Food', 'McDo 🍔')">McDo 🍔</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Fast Food', 'Mang Inasal 🍗')">Mang Inasal 🍗</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Fast Food', 'Chowking 🥢')">Chowking 🥢</button>
+          </div>
+        </div>
+
+        <!-- Buffet -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🍱</span>
+            <div class="card-title">
+              <strong>Buffet</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Buffet', 'Vikings ⚔️')">Vikings ⚔️</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Buffet', 'Buffet 101 🍱')">Buffet 101 🍱</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Buffet', 'Yakimix 🥩')">Yakimix 🥩</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Buffet', 'Bai Hotel Buffet 🏨')">Bai Hotel 🏨</button>
+          </div>
+        </div>
+
+        <!-- Known Cebu Spot -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🍖</span>
+            <div class="card-title">
+              <strong>Famous Cebu Spot</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Cebu Spot', 'House of Lechon 🐷')">House of Lechon 🐷</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Cebu Spot', 'Rico\'s Lechon 🍖')">Rico's Lechon 🍖</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Cebu Spot', 'Chika-an 🍲')">Chika-an 🍲</button>
+          </div>
+        </div>
+
+        <!-- Cafe -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">☕</span>
+            <div class="card-title">
+              <strong>Cozy Cafe</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Cafe', 'Abaca Baking Co. 🥐')">Abaca 🥐</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Cafe', 'Tightrope Coffee ☕')">Tightrope ☕</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'lunch', 'Cafe', 'Bo\'s Coffee ☕')">Bo's Coffee ☕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Input with Add/Replace Toggle -->
+      <div class="form-group" style="margin-top: 15px;">
+        <label for="customLunch">Other Lunch Places in Cebu?</label>
+        <div class="custom-input-group">
+          <input type="text" id="customLunch" placeholder="e.g., Marjo's Pochero, Dimsum Break..." />
+          <button type="button" class="mode-btn replace-mode" id="lunchModeBtn" onclick="toggleCustomMode('lunch')">
+            <span id="lunchModeIcon">⇄</span> <span id="lunchModeText">Replace</span>
+          </button>
+        </div>
+        <small class="mode-hint" id="lunchModeHint">
+          💡 Current Mode: Replaces selected choice if filled out.
+        </small>
+      </div>
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-secondary" onclick="nextStep(2)">Back</button>
+        <button type="button" class="btn" onclick="confirmLunch()">Next ➡️</button>
+      </div>
+    </div>
+
+    <!-- STEP: SNACKS -->
+    <div class="step" id="stepSnacks">
+      <div class="emoji-header">🍿</div>
+      <h2>What are we having for snacks?</h2>
+      <p class="subtitle">Tap a category to pick your treat!</p>
+
+      <div class="choices-stack">
+        <!-- Street Food -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🍢</span>
+            <div class="card-title">
+              <strong>Street Food & BBQ</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Street Food', 'Siomai sa Tisa 🥟')">Siomai sa Tisa 🥟</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Street Food', 'Larsian BBQ 🍢')">Larsian BBQ 🍢</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Street Food', 'Kwek-kwek & Tempura 🥚')">Kwek-kwek 🥚</button>
+          </div>
+        </div>
+
+        <!-- Popcorn -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🍿</span>
+            <div class="card-title">
+              <strong>Popcorn & Cinema Snacks</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Popcorn', 'Chef Tony\'s 🍿')">Chef Tony's 🍿</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Popcorn', 'Taters 🍿')">Taters 🍿</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Popcorn', 'Potato Corner 🍟')">Potato Corner 🍟</button>
+          </div>
+        </div>
+
+        <!-- Burgers -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🍔</span>
+            <div class="card-title">
+              <strong>Burger & Fries</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Burger', 'Zark\'s Burgers 🍔')">Zark's 🍔</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Burger', 'Minute Burger 🍔')">Minute Burger 🍔</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Burger', 'Shake Shack 🍔')">Shake Shack 🍔</button>
+          </div>
+        </div>
+
+        <!-- Waffles / Drinks -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🧇</span>
+            <div class="card-title">
+              <strong>Waffle & Milk Tea</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Waffle', 'Famous Belgian Waffles 🧇')">Famous Belgian 🧇</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Waffle', 'Macao Imperial 🧋')">Macao Imperial 🧋</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'snack', 'Waffle', 'CoCo Fresh Tea 🧋')">CoCo Milk Tea 🧋</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Input with Add/Replace Toggle -->
+      <div class="form-group" style="margin-top: 15px;">
+        <label for="customSnack">Other Snack Ideas?</label>
+        <div class="custom-input-group">
+          <input type="text" id="customSnack" placeholder="e.g., Ice Castle halo-halo..." />
+          <button type="button" class="mode-btn replace-mode" id="snackModeBtn" onclick="toggleCustomMode('snack')">
+            <span id="snackModeIcon">⇄</span> <span id="snackModeText">Replace</span>
+          </button>
+        </div>
+        <small class="mode-hint" id="snackModeHint">
+          💡 Current Mode: Replaces selected choice if filled out.
+        </small>
+      </div>
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-secondary" onclick="nextStep(2)">Back</button>
+        <button type="button" class="btn" onclick="confirmSnacks()">Next ➡️</button>
+      </div>
+    </div>
+
+    <!-- STEP: DINNER -->
+    <div class="step" id="stepDinner">
+      <div class="emoji-header">🍽️</div>
+      <h2>What's for dinner?</h2>
+      <p class="subtitle">Tap a category to pick dinner!</p>
+
+      <div class="choices-stack">
+        <!-- Fast Food -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🍟</span>
+            <div class="card-title">
+              <strong>Fast Food</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Fast Food', 'Jollibee 🐝')">Jollibee 🐝</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Fast Food', 'McDo 🍔')">McDo 🍔</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Fast Food', 'KFC 🍗')">KFC 🍗</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Fast Food', 'Greenwich 🍕')">Greenwich 🍕</button>
+          </div>
+        </div>
+
+        <!-- Buffet -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🍱</span>
+            <div class="card-title">
+              <strong>Buffet Night</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Buffet', 'Vikings ⚔️')">Vikings ⚔️</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Buffet', 'NUSTAR Fili Buffet 🍾')">NUSTAR Fili 🍾</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Buffet', 'CABN Busay 🌄')">CABN Busay 🌄</button>
+          </div>
+        </div>
+
+        <!-- Top Cebu Restaurant -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🍷</span>
+            <div class="card-title">
+              <strong>Top Cebu Restaurant</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Restaurant', 'Lantaw Floating Native 🌅')">Lantaw 🌅</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Restaurant', 'La Vie Parisienne 🍷')">La Vie Parisienne 🍷</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Restaurant', 'Top of Cebu Busay ⛰️')">Top of Cebu ⛰️</button>
+          </div>
+        </div>
+
+        <!-- Samgyupsal -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🥩</span>
+            <div class="card-title">
+              <strong>Korean BBQ / Samgyupsal</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Samgyupsal', 'Romantic Baboy 🥓')">Romantic Baboy 🥓</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Samgyupsal', 'Pearl Meat Shop 🥩')">Pearl Meat Shop 🥩</button>
+            <button type="button" class="sub-chip" onclick="selectSubOption(event, 'dinner', 'Samgyupsal', 'Yukga Korean BBQ 🥢')">Yukga 🥢</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Input with Add/Replace Toggle -->
+      <div class="form-group" style="margin-top: 15px;">
+        <label for="customDinner">Other Dinner Spots in Cebu?</label>
+        <div class="custom-input-group">
+          <input type="text" id="customDinner" placeholder="e.g., Il Corso food park..." />
+          <button type="button" class="mode-btn replace-mode" id="dinnerModeBtn" onclick="toggleCustomMode('dinner')">
+            <span id="dinnerModeIcon">⇄</span> <span id="dinnerModeText">Replace</span>
+          </button>
+        </div>
+        <small class="mode-hint" id="dinnerModeHint">
+          💡 Current Mode: Replaces selected choice if filled out.
+        </small>
+      </div>
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-secondary" onclick="goBackFromDinner()">Back</button>
+        <button type="button" class="btn" onclick="confirmDinner()">Next ➡️</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Choose Activities -->
+    <div class="step" id="stepActivities">
+      <div class="emoji-header">🎯</div>
+      <h2>What to do?</h2>
+      <p class="subtitle">Select one or more fun activities</p>
+
+      <div class="choices-stack">
+        <!-- Cinema -->
+<div class="category-card" onclick="toggleSubMenu(this)">
+  <div class="card-header">
+    <span class="icon">🎬</span>
+    <div class="card-title">
+      <strong>Watch Cinema</strong>
+      <span class="selected-badge">Tap to pick spot</span>
+    </div>
+  </div>
+  <div class="sub-options-grid">
+    <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'Robinsons Galleria Cebu Cinema 🍿')">Robinsons Galleria 🍿</button>
+    <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'SM Seaside Director\'s Club 🎬')">SM Seaside Director's 🎬</button>
+    <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'Ayala Center Cebu Cinema 📽️')">Ayala Center Cebu 📽️</button>
+    <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'Ayala Malls Central Bloc Cinema 🎟️')">Ayala Central Bloc 🎟️</button>
+    <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'SM City Cebu Cinema 🎥')">SM City Cebu 🎥</button>
+    <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'IL Corso VIP Cinema 🌊')">IL Corso VIP Cinema 🌊</button>
+    <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'NUSTAR Cinema 🍾')">NUSTAR Cinema 🍾</button>
+  </div>
+</div>
+
+        <!-- Bowling -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">🎳</span>
+            <div class="card-title">
+              <strong>Play Bowling</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'SM Seaside Bowling 🎳')">SM Seaside Bowling 🎳</button>
+            <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'SM City Cebu Bowling Center 🎳')">SM City Cebu Bowling 🎳</button>
+          </div>
+        </div>
+
+        <!-- Sightseeing / Arcade -->
+        <div class="category-card" onclick="toggleSubMenu(this)">
+          <div class="card-header">
+            <span class="icon">👾</span>
+            <div class="card-title">
+              <strong>Arcade & Fun Spots</strong>
+              <span class="selected-badge">Tap to pick spot</span>
+            </div>
+          </div>
+          <div class="sub-options-grid">
+            <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'Timezone Ayala / Seaside 👾')">Timezone Arcade 👾</button>
+            <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'TOPS Busay View ⛰️')">TOPS Busay ⛰️</button>
+            <button type="button" class="sub-chip" onclick="toggleActivitySubOption(event, this, 'Anjo World Theme Park 🎡')">Anjo World 🎡</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 15px;">
+        <label for="customActivity">Other Ideas?</label>
+        <input type="text" id="customActivity" placeholder="e.g., Ice Skating, Coffee date..." />
+      </div>
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-secondary" onclick="goBackFromActivities()">Back</button>
+        <button type="button" class="btn" onclick="finishDatePlan()">Lock It In! ✨</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Confirmation Summary Table -->
+    <div class="step" id="stepSummary">
+      <div class="emoji-header">🎉</div>
+      <h2>It's a Date!</h2>
+      <p class="subtitle">Here is our schedule:</p>
+
+      <table class="summary-table">
+        <tbody id="summaryTableBody">
+          <!-- Dynamically populated via JS -->
+        </tbody>
+      </table>
+
+      <p class="footer-note">Can't wait to see you! ❤️</p>
+    </div>
+
+  </div>
+
+  <!-- Confetti JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <!-- Main Script -->
+  <script src="script.js"></script>
+</body>
+</html>
